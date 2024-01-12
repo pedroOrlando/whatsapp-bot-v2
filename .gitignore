@@ -1,2 +1,5 @@
 node_modules
 src/config/session.json/session
+src/config/settings/group_settings.json
+src/config/settings/user_settings.json
+.env
