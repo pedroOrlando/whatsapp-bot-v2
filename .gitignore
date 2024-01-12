@@ -3,3 +3,5 @@ src/config/session.json/session
 src/config/settings/group_settings.json
 src/config/settings/user_settings.json
 .env
+.wwebjs_cache
+src/config/utils/backup
