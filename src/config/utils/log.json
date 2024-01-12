@@ -1,0 +1,30 @@
+[
+    {
+        "contactToMention": {
+            "businessProfile": {
+                "id": {
+                    "server": "c.us",
+                    "user": "553194947734",
+                    "_serialized": "553194947734@c.us"
+                }
+            },
+            "id": {
+                "server": "c.us",
+                "user": "553194947734",
+                "_serialized": "553194947734@c.us"
+            },
+            "isBusiness": true,
+            "isEnterprise": false,
+            "name": "@💕",
+            "pushname": "~",
+            "shortName": "",
+            "type": "in",
+            "verifiedLevel": 0,
+            "verifiedName": "Carol Oliveira",
+            "isBlocked": false
+        },
+        "id": "553194947734",
+        "ranking": "lastWeekCount",
+        "count": 2
+    }
+]
