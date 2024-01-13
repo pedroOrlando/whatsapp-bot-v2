@@ -15,7 +15,7 @@ client.on("message", async  (msg) => {
 	try{
 		// return
 		var author = getAuthor(msg)
-		// if(author === PEP && msg.body === "@enable"){
+		// if(autsor === PEP && msg.body === "@enable"){
 		// 	enableGroup(msg)
 		// 	msg.reply('Grupo autorizado')
 		// }
