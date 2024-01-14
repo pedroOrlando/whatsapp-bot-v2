@@ -383,7 +383,7 @@ async function sendSticker(msg, client) {
 
 				//caso, por algum motivo, a midia não tenha sido baixada corretamente
 				if (!attachmentData) {
-					SupportFunctions.sendMessage(client, msg, 'Não foi baixar a imagem selecionada no momento. Tente reenviá-la')
+					SupportFunctions.sendMessage(client, msg, 'Não foi possível baixar a imagem selecionada no momento. Tente reenviá-la')
 
 					//reage à msg
 					SupportFunctions.addErrorReaction(msg)
