@@ -1665,8 +1665,8 @@ module.exports = {
 
 
 		//a cada 10 usos, envia a mensagem
-		if(count.chats[msgData.chat.id] % 5 === 0){
-			let opcoes = ['pagar um baseado', 'pagar um cafezinho', 'dar uma moral', 'pagar uma sessão de terapia', 'dar um salve', 'pagar um boleto', 'pagar uma coquinha', 'pagar uma paçoca']
+		if(count.chats[msgData.chat.id] % 10 === 0){
+			let opcoes = [/*'pagar um baseado',*/ 'pagar um cafezinho', 'dar uma moral', 'pagar uma sessão de terapia', 'dar um salve', 'pagar um boleto', 'pagar uma coquinha', 'pagar uma paçoca']
 			//sorteia uma opção do array
 			let sorteado = this.getRandomInt(opcoes.length)
 			//let prefix = "🚨❗️🚨❗️*Aviso*: Por razões técnicas, o número do bot será alterado em breve. Para continuar utilizando as funções no novo número, sigam o instagram oficial que assim que o número mudar ele será disponibilizado por lá: instagram.com/wpp.bot 🚨❗️🚨\n\n"
