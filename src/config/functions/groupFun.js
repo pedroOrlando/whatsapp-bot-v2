@@ -295,30 +295,48 @@ async function sorteio(msg, client){
 	}
 
 	let selected
+
+	//permite que se defina o número de sorteados
+	let ammount = msg.body && Number(msg.body.split(' ')[1])
+	let number = ammount || 1;
+	let plural = number > 1 ? 's' : ''
+
 	if(msg.mentionedIds && msg.mentionedIds.length > 0){
-		if(msg.mentionedIds.length === 1){
-			SupportFunctions.simulateTyping(msg,"Mencione mais de um participante para fazer o sorteio",null, null, null, true)
+		if(msg.mentionedIds.length <= number){
+			SupportFunctions.simulateTyping(msg,"Mencione mais participantes do que o número de sorteados.",null, null, null, true)
 			//reage à msg
 			SupportFunctions.addErrorReaction(msg)
 			return
 		}
 
 		//seleciona uma pessoa da lista de mencionados
-		selected = SupportFunctions.randomPick(msg.mentionedIds, 1)
+		selected = SupportFunctions.randomPick(msg.mentionedIds, number)
 
-		//busca o contato pra mencionar 
-		let contact = await client.getContactById(selected)
+		// console.log(selected)
+		//busca o(s) contato(s) pra mencionar 
+		let contact = await Promise.all(selected.map(async part => {
+			let contact = await client.getContactById(part)
+			return {
+				"contact": contact,
+				"id": contact.id.user,
+				"name": contact.verifiedName || contact.pushname
+			}
+		})).then((participants) =>{
+			return participants
+		})
 
-		//monta a mensagem de resposta
-		let text = `Membro sorteado: @${SupportFunctions.formatNumber(selected[0])} `;
 		
+		//monta a mensagem de resposta
+		let text = `Membro${plural} sorteado${plural}: ${contact.map(contact => `@${contact.id}`).join(', ')}`;
+
 		//monta as mentions e envia a msg
-		let mentions = [contact];
+		let mentions = contact.map(contact => contact.contact);
+		
 		SupportFunctions.simulateTyping(msg, text, null , chat, mentions, true)
 		return
 	}else{
 		//pega um participante aleatório (excluindo o bot)
-		selected = await SupportFunctions.getParticipants(msg, chat, client, 1, false, true)
+		selected = await SupportFunctions.getParticipants(msg, chat, client, number, false, true)
 		if(!selected){
 			SupportFunctions.simulateTyping(msg,"Número de participantes insuficiente",null, null, null, true)
 			//reage à msg
@@ -328,8 +346,9 @@ async function sorteio(msg, client){
 	}
 
 	//monta a mensagem e envia
-	let text = `Membro sorteado: @${selected[0].id} `;
+	let text = `Membro${plural} sorteado${plural}: ${selected.map(selected => `@${selected.id}`).join(', ')}`;
 	let mentions = selected.map(sel => sel.contact);
+
 	SupportFunctions.simulateTyping(msg, text, null , chat, mentions, true)
 }
 
