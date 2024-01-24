@@ -1840,6 +1840,17 @@ module.exports = {
 		}
 	},
 
+	generateLotterySet: function(){
+		let set = []
+		while (set.length < 6) {
+			let number = this.getRandomInt(60, true)
+			if(!set.includes(number)){
+				set.push(number)
+			}
+		}
+		return set.sort(function(a, b){return a-b}).join(', ')
+	},
+
 	//envia o menu do bot
 	sendMenu(msg){
 		let toLowerBody = msg.body.toLowerCase()
@@ -1866,7 +1877,7 @@ module.exports = {
 				menuUtils += "\n🖼 *@stickerbg* -> remove o fundo de uma imagem e envia como sticker"
 				menuUtils += "\n📝 *@tts* -> transforma um texto em sticker. Para exemplos de utilização, digite _@tts_"
 				menuUtils += "\n🔢 *@d#* -> gera um número aleatório entre 1 e o número selecionado. Ex: @d6, @d20, @d100, @d999"
-				menuUtils += "\n🍀 *@sorteio* -> sorteia um membro aleatório do um grupo"
+				menuUtils += "💰 *@loteria* -> gera um jogo de 6 números aleatórios de 1 a 60"
 
 			this.simulateTyping(msg, menuUtils)
 		}
@@ -1880,7 +1891,6 @@ module.exports = {
 				menuEnt += "💋 *@beijo* -> descubra quem do grupo vc quer pegar\n"
 				menuEnt += "👅 *@sexo* -> descubra qual vai ser o esquema\n"
 				menuEnt += "🔥 *@vddOuCons/@verdadeouconsequencia* -> Verdade ou consequência: sorteia um participante do grupo pra perguntar, outro pra responder\n"
-				menuEnt += "🍀 *@sorteio* ->  sorteia algum membro do grupo inteiro, ou a partir de uma lista de menções (@sorteio @pessoa1 @pessoa2 @pessoa3)\n"
 			
 			this.simulateTyping(msg, menuEnt)
 		}
@@ -1909,6 +1919,7 @@ module.exports = {
 				menuGrupos += "❌ *@remove* (apenas admins) -> remove um participante do grupo (use respondendo uma mensagem de quem quer remover, ou mencionando a pessoa diretamente)\n"
 				menuGrupos += "📢 *@closeGroup/@openGroup* -> Fecha o grupo para que só admins possam mandar mensagens/Abre o grupo pra qualquer membro mandar mensagem\n"
 				menuGrupos += "📃 *@desc* -> Imprime a descrição do grupo\n"
+				menuGrupos += "🍀 *@sorteio* -> sorteia algum membro do grupo inteiro, ou a partir de uma lista de menções (@sorteio @pessoa1 @pessoa2 @pessoa3). Para sortear mais de uma pessoa, utilize @sorteio # (substituindo o '#' pelo número desejado)\n"
 				menuGrupos += "📣 *@everyone/@geral* (apenas admins de grupos autorizados) -> Menciona todo mundo do grupo"
 				this.simulateTyping(msg, menuGrupos)
 		}
@@ -1965,13 +1976,7 @@ module.exports = {
 
 		if(toLowerBody == '@menunovidades'){
 			let ultimasFuncoes = "Últimas funções implementadas: \n\n"
-				ultimasFuncoes += "📧 *@rastreio codigo1 codigo2* -> faz o rastreio de uma encomenda nos correios\n"
-				ultimasFuncoes += "🌠 *@apod random* -> Envia uma APOD (Astronomy Picture of the Day) aleatória\n"
-				ultimasFuncoes += "🌠 *@apod dd/mm/aaaa* -> Envia a APOD (Astronomy Picture of the Day) de uma data específica\n"
-				ultimasFuncoes += "🌠 *@apod* -> Envia a APOD (Astronomy Picture of the Day) de hoje\n"
-				ultimasFuncoes += "🎥 *@filme nome do filme* -> Envia as informações de um filme\n"
-				ultimasFuncoes += "🎥 *@série nome da série* -> Envia as informações de uma série\n"
-				ultimasFuncoes += "🐈 *@gato/@cat/@gatinho/@gatinhu* -> Envia uma foto de um gato aleatório"
+				ultimasFuncoes += "💰 *@loteria* -> gera um jogo de 6 números aleatórios de 1 a 60"
 			this.simulateTyping(msg, ultimasFuncoes)
 		}
 		

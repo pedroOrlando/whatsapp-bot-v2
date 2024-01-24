@@ -133,6 +133,11 @@ module.exports = {
 			}
 		}
 
+		//gera um jogo de loteria
+		if(toLowerBody === "@loteria"){
+			generateLotterySet(msg)
+		}
+
 	}
 };
 
@@ -1736,7 +1741,7 @@ function sendMenu(msg){
 	SupportFunctions.sendMenu(msg)
 }
 
-//autoriza um grupo a usar funções especiais que precisam desse nivel de autorização
+//envia os stats de uso do bot
 async function botStats(msg){
 	//busca o autor da msg
 	const msgAuthor = await SupportFunctions.getAuthor(msg)
@@ -1796,4 +1801,9 @@ async function botStats(msg){
 	}
 }
 
+//gera e envia um jogo de loteria de 6 jogos
+function generateLotterySet(msg){
+	let generated = SupportFunctions.generateLotterySet();
+	SupportFunctions.simulateTyping(msg, `Jogo gerado: \n\n${generated}`)
+}
 
