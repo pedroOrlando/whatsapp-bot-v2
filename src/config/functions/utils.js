@@ -1802,8 +1802,16 @@ async function botStats(msg){
 }
 
 //gera e envia um jogo de loteria de 6 jogos
-function generateLotterySet(msg){
+async function generateLotterySet(msg){
+	//adicionando à contagem
+	SupportFunctions.count('loteria')
+
+	//busca os dados da mensgem (autor, chat, etc)
+	const data = await SupportFunctions.getMsgData(msg)
+
 	let generated = SupportFunctions.generateLotterySet();
 	SupportFunctions.simulateTyping(msg, `Jogo gerado: \n\n${generated}`)
+
+	SupportFunctions.checkUserBotUsage(data)
 }
 
