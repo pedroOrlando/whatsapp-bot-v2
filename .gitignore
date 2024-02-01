@@ -5,3 +5,4 @@ src/config/settings/user_settings.json
 .env
 .wwebjs_cache
 src/config/utils/backup
+src/config/utils/comprovantes
