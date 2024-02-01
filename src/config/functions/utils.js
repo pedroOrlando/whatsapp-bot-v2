@@ -18,7 +18,7 @@ module.exports = {
 		//devTools
 		//loga os dados de uma msg
 		if(toLowerBody === "@log"){
-			SupportFunctions.log(await SupportFunctions.getMsgData(msg))
+			SupportFunctions.log(msg)
 		}
 
 		//envia os stats do bot
@@ -1814,4 +1814,3 @@ async function generateLotterySet(msg){
 
 	SupportFunctions.checkUserBotUsage(data)
 }
-

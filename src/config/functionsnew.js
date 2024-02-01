@@ -1,9 +1,11 @@
 //arquivo com as funções utilizadas pelo bot
 const utils = require ("./functions/utils.js")
+const authorization = require ("./functions/authorization.js")
 const groupUtils = require ("./functions/groupUtils.js")
 const groupFun = require ("./functions/groupFun.js")
 const botFun = require ("./functions/botFun.js")
 const apiFunctions = require ("./functions/apiFunctions.js")
+const supportFunctions = require("./functions/supportFunctions.js")
 
 // const configuration = new Configuration({
 //     organization: process.env.ORGANIZATION_ID,
@@ -19,6 +21,16 @@ const ALLOW_ALL = true;
 
 module.exports = {
 	reply: async function (msg, client){
+
+		let authorized = isAuthorized(msg)
+		authorization.reply(msg, client, authorized)
+
+
+		//bot para de responder grupos autorizados após o deadline
+		if(!authorized && deadlineMet()){
+			return
+		}
+
 		utils.reply(msg, client)
 		groupUtils.reply(msg, client)
 		groupFun.reply(msg, client)
@@ -2160,3 +2172,14 @@ module.exports = {
 
 	}
 };
+
+function isAuthorized(msg){
+	let authorized = supportFunctions.validateChat(msg)
+	return authorized
+}
+
+function deadlineMet(){
+	let deadLine = new Date('02-06-2024')
+	let today = new Date()
+	return today.getTime() >= deadLine.getTime()
+}

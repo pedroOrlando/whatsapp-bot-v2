@@ -51,7 +51,7 @@ module.exports = {
 	},
 
 	//envia uma mensagem usando o client, com várias opções disponíveis
-	sendMessage: async function (client, msg, content, caption, sendAsSticker, quotedId, stickerName, stickerAuthor, inputChat, delay){
+	sendMessage: async function (client, msg, content, caption, sendAsSticker, quotedId, stickerName, stickerAuthor, inputChat, delay, to){
 		/*
 			Parametros de execução
 				client: entidade que executa o método de enviar a mensagem
@@ -70,7 +70,13 @@ module.exports = {
 
 		let chat = inputChat || await msg.getChat()
 
+		//por padrão, a mensagem vai ser enviada pro mesmo chat de origem
+		let destinatario = from
 
+		//caso o parametro 'to' tenha sido passado, é pra lá que ela vai ser enviada
+		if(to){
+			destinatario = to
+		}
 
 		//monta a estrutura de opções de envio da mensagem e envia
 		let options = {
@@ -87,11 +93,10 @@ module.exports = {
 		//define por quanto tempo vai ficar digitando
 		let i = delay === 0 ? delay : this.getRandomInt(3, true)
 
-
 		setTimeout(function () {
 			// após esperar i segundos, cancela o estado 'digitando' e envia a mensagem
 			chat.clearState()
-			client.sendMessage(from, content, options)
+			client.sendMessage(destinatario, content, options)
 		}, i*1000);
 
 	},
@@ -578,6 +583,10 @@ module.exports = {
 
 	//valida que um grupo é autorizado
 	validateGroup: async function (msg, inputChat){
+			//Alteração: a partir de agora, todos os grupos serão autorizados porque os grupos em que o bot funcionar são os grupos que pagaram. 
+			return true
+
+			//DEPRECATED
 			//busca os dados do grupo
 			const chat = inputChat || await msg.getChat()
 			let id = chat.id.user
@@ -586,6 +595,64 @@ module.exports = {
 			return settings.authorized
 	},
 
+	//adiciona um chat na lista de chats autorizados
+	authorizeChat: async function (msg, inputParams){
+		//identificador do chat
+		let chatId = formatId(msg.from) 
+		let name
+		if(inputParams){
+			chatId = formatId(inputParams.chatId)
+			name = inputParams.chatName
+		}
+
+		//carrega o arquivo com os chats autorizados
+		let enabledPath = path.join(__dirname, '../utils/enabledChats.json');
+		let enabledChats = load(enabledPath)
+		
+		//vai retornar true se o chat de origem for autorizado, ou se o autor da mensagem for autorizado
+		let found = enabledChats && enabledChats.chats && enabledChats.chats.find(chat => chat.id === chatId)
+
+		//se não achar o chat na lista, insere
+		if(!found){
+			let msgData = await this.getMsgData(msg)
+			enabledChats.chats.push({
+				"id": chatId,
+				"name": name || msgData.chat.name
+			})
+
+			save(enabledChats, enabledPath)
+			this.backup(msg, true)
+			return true
+		}
+		
+		return false
+		
+	},
+
+	//valida que a mensagem de input pode ser respondida pelo bot. Vai retornar true caso seja a) um grupo autorizado ou b) um usuário autorizado (em grupo ou no privado) c) admin do bot
+	validateChat: function (msg, chatOnly){
+		//identificador do chat
+		let from = formatId(msg.from)
+
+		//identificador do autor da msg. vai estar preenchido caso o chat seja um grupo
+		let author = formatId(msg.author)
+
+		//carrega o arquivo com os chats autorizados
+		let enabledPath = path.join(__dirname, '../utils/enabledChats.json');
+		let enabledChats = load(enabledPath)
+		
+		//vai retornar true se o chat de origem for autorizado, ou se o autor da mensagem for autorizado.
+		let found = enabledChats && enabledChats.chats && enabledChats.chats.find(chat => chat.id === from)
+
+		//busca os admins do bot
+		let admins = this.getBotAdmins()
+
+		//se for em grupo, é o author da msg. se for individual, é o id do proprio chat
+		let authorId = author || from
+		let isAdmin = admins && admins.includes(authorId)
+		
+		return found || (!chatOnly && isAdmin)
+	},
 
 	//retorna uma lista de participantes de um determinado chat no formato de mention
 	getParticipants: async function(msg, inputChat, client, number, includeBot, includeSender){
@@ -1663,14 +1730,23 @@ module.exports = {
 		count.chats[msgData.chat.id] ++;
 		save(count, contentFilePath)
 
+		
 
 		//a cada 10 usos, envia a mensagem
 		if(count.chats[msgData.chat.id] % 10 === 0){
-			let opcoes = [/*'pagar um baseado',*/ 'pagar um cafezinho', 'dar uma moral', 'pagar uma sessão de terapia', 'dar um salve', 'pagar um boleto', 'pagar uma coquinha', 'pagar uma paçoca']
-			//sorteia uma opção do array
-			let sorteado = this.getRandomInt(opcoes.length)
-			//let prefix = "🚨❗️🚨❗️*Aviso*: Por razões técnicas, o número do bot será alterado em breve. Para continuar utilizando as funções no novo número, sigam o instagram oficial que assim que o número mudar ele será disponibilizado por lá: instagram.com/wpp.bot 🚨❗️🚨\n\n"
-			let msg = `Me siga no instagram: instagram.com/wpp.bot. \nGostou do bot e quer ${opcoes[sorteado]} pro dev? A chave pix é ${settings.PIX_BOT} 😉`
+			let msg
+			//mensagem para grupos não autorizados
+			if(!this.validateChat(msgData.msg.data)){
+				msg = "❗❗❗ *Aviso importante* ❗❗❗"
+				msg += "\n\nO Whatsapp mudou as diretrizes e está cada vez mais difícil manter o número (devido a bloqueios e banimentos). "
+				msg += "\n\nPor esse motivo, Após o dia 05/02/2024, apenas *GRUPOS E USUÁRIOS AUTORIZADOS* poderão usar as funções. "
+				msg += "\n\nPara informações sobre como autorizar um grupo/usuário, utilize o comando @autorizar"
+			}else{
+				let opcoes = [/*'pagar um baseado',*/ 'pagar um cafezinho', 'dar uma moral', 'pagar uma sessão de terapia', 'dar um salve', 'pagar um boleto', 'pagar uma coquinha', 'pagar uma paçoca']
+				//sorteia uma opção do array
+				let sorteado = this.getRandomInt(opcoes.length)
+				msg = `Me siga no instagram: instagram.com/${settings.BOT_INSTAGRAM}. \nGostou do bot e quer ${opcoes[sorteado]} pro dev? A chave pix é ${settings.PIX_BOT} 😉`
+			}
 
 			this.simulateTyping(msgData.msg.data, msg, null, null, null, true)
 		}
@@ -1769,13 +1845,14 @@ module.exports = {
 		}
 	},
 
-	//faz backup dos arquivos do bot (stats/usage/)
-	backup: function(msg){
+	//faz backup dos arquivos do bot (stats/usage/enabled)
+	backup: function(msg, enabledOnly){
 		const STATS_DIR = path.join(__dirname, '/../stats/stats.json');
 		const BOT_USAGE_DIR = path.join(__dirname, '/../stats/userBotUsage.json');
 		const BOT_SETTINGS_DIR = path.join(__dirname, '/../settings/bot_settings.json');
 		const USER_SETTINGS_DIR = path.join(__dirname, '/../settings/user_settings.json');
 		const GROUP_SETTINGS_DIR = path.join(__dirname, '/../settings/group_settings.json');
+		const ENABLED_DIR = path.join(__dirname, '/../utils/enabledChats.json');
 		const BACKUP_DIR = path.join(__dirname, '/../utils/backup/');
 
 		//carrega os arquivos
@@ -1784,17 +1861,27 @@ module.exports = {
 		let botSettings = {"data": load(BOT_SETTINGS_DIR), "fileName": "bot_settings"}
 		let userSettings = {"data": load(USER_SETTINGS_DIR), "fileName": "user_settings"}
 		let groupSettings = {"data": load(GROUP_SETTINGS_DIR), "fileName": "group_settings"} 
+		let enabledChats = {"data": load(ENABLED_DIR), "fileName": "enabledChats"} 
 
 		let backupTs = new Date().getTime()
 
-		let filesData = [stats, usage, botSettings, userSettings, groupSettings];
+		let filesData = [stats, usage, botSettings, userSettings, groupSettings, enabledChats];
+
+		//caso o backup seja apenas para o enabled (função autorizar)
+		if(enabledOnly){
+			filesData = [enabledChats]
+		}
 		
 		//pra cada um dos arquivos
 		filesData.forEach(fileData =>{
 			let backupPath = `${BACKUP_DIR}${fileData.fileName}.${backupTs}.json`
 			save(fileData.data, backupPath)
 		})
-		
+
+		if(enabledOnly){
+			return
+		}
+
 		this.simulateTyping(msg, "Backup Realizado")
 
 	},
@@ -1840,6 +1927,7 @@ module.exports = {
 		}
 	},
 
+	//gera um jogo da loteria
 	generateLotterySet: function(){
 		let set = []
 		while (set.length < 6) {
@@ -1851,8 +1939,24 @@ module.exports = {
 		return set.sort(function(a, b){return a-b}).join(', ')
 	},
 
+	//retorna se a msg foi enviada por um adm
+	isFromAdmin: function(msg){
+		//identificador do chat
+		let from = formatId(msg.from)
+
+		//identificador do autor da msg. vai estar preenchido caso o chat seja um grupo
+		let author = formatId(msg.author)
+
+		let msgAuthor = author || from;
+		let botAdmins = this.getBotSettings().BOT_ADMINS
+
+		return botAdmins.includes(msgAuthor)
+	},
+
 	//envia o menu do bot
-	sendMenu(msg){
+	sendMenu: function (msg){
+		
+
 		let toLowerBody = msg.body.toLowerCase()
 
 		//menu raiz
@@ -1866,6 +1970,10 @@ module.exports = {
 				rootMenu += "\n💪 *@menuTaPago* -> Envia os comandos de tá pago"
 				rootMenu += "\n🔃 *@menuNovidades* -> Envia os últimos comandos implementados"
 
+				if(this.isFromAdmin(msg)){
+					rootMenu += "\n⚙️ *@menuAdm* -> Envia os comandos para admins do bot"
+				}
+				
 			this.simulateTyping(msg, rootMenu)
 		}
 
@@ -2145,4 +2253,13 @@ function removeOneOccurrenceFromArray(arr, inputString) {
 	return arr;
 }
 
+//formata o id de um chat/remetente excluindo o que vem após o '@' (@g.us)
+function formatId(id){
+	if(!id){
+		return null
+	}
 
+	//se o numero tiver o @g.us, tira
+	let formated = id.indexOf("@") !== -1 ? id.slice(0, id.indexOf("@")) : id
+	return formated
+}
