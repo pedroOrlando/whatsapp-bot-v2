@@ -31,7 +31,7 @@ module.exports = {
 		}
 		
 		//envia o menu caso algum comando tenha sido executado por um grupo ou usuário não autorizados
-		if (!authorized && ['@menu', "@sticker", "@stickerbg", "@tts", "ta pago", "tá pago", "ta cago", "tá cago", "@beijo", "@presente"].includes(toLowerBody)) {
+		if (!authorized && deadlineMet() && ['@menu', "@sticker", "@stickerbg", "@tts", "ta pago", "tá pago", "ta cago", "tá cago", "@beijo", "@presente"].includes(toLowerBody)) {
 			sendDefaultMessage(msg, client)
 		}
 
@@ -354,3 +354,8 @@ async function validarPix(msg, client){
 	
 }
 
+function deadlineMet(){
+	let deadLine = new Date('02-06-2024')
+	let today = new Date()
+	return today.getTime() >= deadLine.getTime()
+}
