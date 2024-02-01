@@ -1325,7 +1325,7 @@ module.exports = {
 
 		//busca as configurações de tá pago do bot. Isso vai servir pra puxar os identificadores de cada registro
 		let settings = this.getBotSettings().TA_PAGO_SETTINGS
-		let taPagoOptions = settings.map(sett => sett.KEY)
+		let taPagoOptions = settings.filter(sett => !sett.PRIVATE).map(sett => sett.KEY)
 		
 
 		//inicia o template de mensagens de erro de acordo com a operação a ser executada
@@ -2219,13 +2219,12 @@ async function getAdhocTaPagoParams(msg, settings, client){
 	//validando a estrutura da data
 	date = validateDateString(date) ? date : ''
 
-
 	//retorna a estrutura necessária para o cancelamento/adição
 	return {
 		'date': date,
 		"reason": reason,
 		"author": author,
-		"key": keySettings.KEY,
+		"key": keySettings && keySettings.KEY,
 		"settings": keySettings
   	}
 }

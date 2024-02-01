@@ -812,6 +812,7 @@ async function taPagoAdhoc(msg, client){
 			SupportFunctions.addErrorReaction(msg)
 			return
 		}else{
+			console.log(e)
 			SupportFunctions.simulateTyping(msg,"Ops, algo deu errado ao obter os parâmetros de adição.")
 	
 			//reage à msg
