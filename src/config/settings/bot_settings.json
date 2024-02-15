@@ -171,6 +171,21 @@
             "ADD_TRIGGERS": ["@creatina"], 
             "USER_TA_PAGO_TRIGGERS": ["@historicocreatina"],
             "MENU_TRIGGERS": ["menu creatina"]
+        },
+        {
+            "KEY": "historicoRinite",
+            "ALLOW_MULTIPLE": false,
+            "FRASE": "Atchim",
+            "STICKER": "aosDevedores.png",
+            "RANKING_NAME":"rinite",
+            "NOME_PAGADOR": "rinite",
+            "EMOJI": "👃",
+            "PRIVATE": true,
+            "VERBO": "rinitou",
+            "NOME_REGISTRO": "rinites",
+            "ADD_TRIGGERS": ["@rinite"], 
+            "USER_TA_PAGO_TRIGGERS": ["@historicorinite"],
+            "MENU_TRIGGERS": ["menu rinite"]
         }
     ],
     "USER_KEY_SETTINGS":[
